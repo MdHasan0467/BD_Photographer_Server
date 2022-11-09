@@ -46,10 +46,15 @@ async function run() {
 		//! three services collection...
 		app.get('/service', async (req, res) => {
 			const query = {};
+
+			const count = await servicesCollection.estimatedDocumentCount(query);
 			const cursor = servicesCollection.find(query);
-			const services = await cursor.limit(3).toArray();
+			const services = await cursor.skip(parseInt(count) - 3).toArray();
 			res.send(services);
 		});
+
+
+		
 
 		//! Service details....
 		app.get('/service/:id', async (req, res) => {
@@ -73,8 +78,7 @@ async function run() {
 			res.send(result);
 		});
 
-
-		//! Individually users Review Get....
+		//! Individually users Review ....
 		app.get('/reviews', async (req, res) => {
 			let query = {};
 			if (req.query.email) {
@@ -85,11 +89,10 @@ async function run() {
 			res.send(reviews);
 		});
 
-
-		//! Individually users Review by ID Get....
+		//! Individually users Review by ID ....
 		app.get('/reviews/:id', async (req, res) => {
 			const id = req.params.id;
-			const query = { ServiceId:id};
+			const query = { ServiceId: id };
 			const cursor = reviewCollection.find(query);
 			const reviews = await cursor.toArray();
 			res.send(reviews);
@@ -103,9 +106,39 @@ async function run() {
 			res.send(result);
 		});
 
+		// //! Put for update
+		// app.put('/update/:id', async (req, res) => {
+		// 	const id = req.params.id;
+		// 	const query = { _id: ObjectId(id) };
+		// 	const updatedReview = req.body;
+		// 	console.log(updatedReview);
+		// });
 
+		// // ! This is CRUD => U = Create //TODO: Update root
+		// app.get('/users/:id', async (req, res) => {
+		// 	const id = req.params.id;
+		// 	const query = { _id: ObjectId(id) }; //! kon id k delete korte chai
+		// 	const result = await userCollection.findOne(query);
+		// 	res.send(result);
+		// });
 
-		
+		// //! Update value by Put/patch
+		// app.put('/users/:id', async (req, res) => {
+		// 	const id = req.params.id;
+		// 	const query = { _id: ObjectId(id) }; //! kon id k delete korte chai
+		// 	const user = req.body;
+		// 	const option = { upsert: true }; //! Value thakle Update korbe.. R na thakele Insert korbe
+		// 	const updatedUser = {
+		// 		$set: {
+		// 			name: user.name,
+		// 			email: user.email,
+		// 			address: user.address,
+		// 		},
+		// 	};
+		// 	const result = await userCollection.updateOne(query, updatedUser, option);
+		// 	res.send(result);
+		// 	// console.log(updatedUser)
+		// });
 	} finally {
 	}
 }

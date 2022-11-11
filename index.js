@@ -46,13 +46,13 @@ async function run() {
 		const reviewCollection = client.db('photoCollection').collection('reviews');
 
 		//! receive the request from the client side and give him a JWT token...
-		app.post('/jwt', (req, res) => {
-			const user = req.body;
-			const token = jwt.sign(user, process.env.ACCESS_JWT_TOKEN, {
-				expiresIn: '5',
-			});
-			res.send({ token });
-		});
+		// app.post('/jwt', (req, res) => {
+		// 	const user = req.body;
+		// 	const token = jwt.sign(user, process.env.ACCESS_JWT_TOKEN, {
+		// 		expiresIn: '5',
+		// 	});
+		// 	res.send({ token });
+		// });
 
 		//! All services are available...
 		app.get('/services', async (req, res) => {
@@ -79,8 +79,6 @@ async function run() {
 			res.send(services);
 		});
 
-		
-
 		//! Service details....
 		app.get('/service/:id', async (req, res) => {
 			const id = req.params.id;
@@ -105,8 +103,6 @@ async function run() {
 
 		//! Individually users Review By checking email ....
 		app.get('/reviews', async (req, res) => {
-			
-
 			let query = {};
 			if (req.query.email) {
 				query = { email: req.query.email };
@@ -133,42 +129,37 @@ async function run() {
 			res.send(result);
 		});
 
-		//!!=========>
+	
 
-		app.patch('/reviews/:id', async (req, res) => {
-			// console.log(req.params.id);
+
+		// ! This is CRUD => U = Create //TODO: Update root
+		app.get('/update/:id', async (req, res) => {
 			const id = req.params.id;
 			const query = { _id: ObjectId(id) };
-		
-			const review = req.body;
-			// console.log(review);
-			const result = await reviewCollection.updateOne(query,{$set:{message:review.message}});
+			const result = await reviewCollection.findOne(query);
 			res.send(result);
+		});
 
 
 
-
-
-
-
-			// const userEmail = req.query.email;
-			// const updatedId = req.query.id;
-			// console.log(userEmail, updatedId);
-
-			// const decoded = req.decoded.email;
-			// if (decoded !== userEmail) {
-			// 	res.status(403).send({ message: 'Forbidden access' });
-			// }
-			// const currentReview = req.body.status;
-			// console.log(currentReview);
-			// const query = { _id: ObjectId(updatedId) };
-			// const updateDoc = {
-			// 	$set: {
-			// 		message: currentReview,
-			// 	},
-			// };
-			// const result = await reviewCollection.updateOne(query, updateDoc);
-			// res.send(result);
+		//! Update value by Put/patch
+		app.put('/update/:id', async (req, res) => {
+			const id = req.params.id;
+			const query = { _id: ObjectId(id) };
+			const review = req.body;
+			const option = { upsert: true };
+			const updatedReview = {
+				$set: {
+					message: review.message,
+					
+				},
+			};
+			const result = await reviewCollection.updateOne(
+				query,
+				updatedReview,
+				option
+			);
+			res.send(result);
 		});
 	} finally {
 	}

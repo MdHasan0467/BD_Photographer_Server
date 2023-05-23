@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -9,17 +9,23 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-	res.send('Assignment Eleven Server is Running  check');
-});
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.y0hhy5e.mongodb.net/?retryWrites=true&w=majority`;
 
-const client = new MongoClient(uri, {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-	serverApi: ServerApiVersion.v1,
-});
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.dewgdxt.mongodb.net/?retryWrites=true&w=majority`;
+
+// const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+const uri = "mongodb+srv://MdHasan:Yn8TqCyRQ5HBpL4q@cluster0.dewgdxt.mongodb.net/?retryWrites=true&w=majority";
+
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+
+
+
+
+
+
 
 //! JWT verify ....
 
@@ -40,9 +46,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
 	try {
-		const servicesCollection = client
-			.db('photoCollection')
-			.collection('services');
+		const servicesCollection = client.db('photoCollection').collection('services');
 		const reviewCollection = client.db('photoCollection').collection('reviews');
 
 		//! receive the request from the client side and give him a JWT token...
@@ -55,6 +59,9 @@ async function run() {
 		// });
 
 		//! All services are available...
+
+
+
 		app.get('/services', async (req, res) => {
 			const query = {};
 			const cursor = servicesCollection.find(query);
@@ -62,7 +69,10 @@ async function run() {
 			res.send(services);
 		});
 
-		//! Gallery Services collection...
+
+
+
+		// ! Gallery Services collection...
 		app.get('/GalleryServices', async (req, res) => {
 			const query = {};
 			const cursor = servicesCollection.find(query);
@@ -70,38 +80,64 @@ async function run() {
 			res.send(services);
 		});
 
-		//! three services collection...
+
+
+
+
+		// ! three services collection...
+		// app.get('/service', async (req, res) => {
+		// 	const query = {};
+		// 	const count = await servicesCollection.estimatedDocumentCount(query);
+		// 	const cursor = servicesCollection.find(query);
+		// 	const services = await cursor.skip(parseInt(count) - 3).toArray();
+		// 	res.send(services);
+		// });
 		app.get('/service', async (req, res) => {
 			const query = {};
-			const count = await servicesCollection.estimatedDocumentCount(query);
 			const cursor = servicesCollection.find(query);
-			const services = await cursor.skip(parseInt(count) - 3).toArray();
+			const services = await cursor.toArray();
 			res.send(services);
 		});
 
-		//! Service details....
+
+
+
+		// ! Service details....
 		app.get('/service/:id', async (req, res) => {
 			const id = req.params.id;
-			const query = { _id: ObjectId(id) };
+			const query = { _id: new ObjectId(id) };
 			const service = await servicesCollection.findOne(query);
 			res.send(service);
 		});
 
-		//! Add a new service....
+
+
+
+
+
+		// ! Add a new service....
 		app.post('/services', async (req, res) => {
 			const services = req.body;
+			console.log(services);
 			const result = await servicesCollection.insertOne(services);
 			res.send(result);
 		});
 
-		//! Review Post....
+
+
+
+
+		// ! Review Post....
 		app.post('/reviews', async (req, res) => {
 			const reviews = req.body;
 			const result = await reviewCollection.insertOne(reviews);
 			res.send(result);
 		});
 
-		//! Individually users Review By checking email ....
+
+
+
+		// ! Individually users Review By checking email ....
 		app.get('/reviews', async (req, res) => {
 			let query = {};
 			if (req.query.email) {
@@ -112,7 +148,10 @@ async function run() {
 			res.send(reviews);
 		});
 
-		//! Individually users Review by ID ....
+
+
+
+		// !  Individually users Review by ID ....
 		app.get('/reviews/:id', async (req, res) => {
 			const id = req.params.id;
 			const query = { ServiceId: id };
@@ -121,10 +160,13 @@ async function run() {
 			res.send(reviews);
 		});
 
-		//! Delete
+
+
+
+		// ! Delete
 		app.delete('/reviews/:id', async (req, res) => {
 			const id = req.params.id;
-			const query = { _id: ObjectId(id) };
+			const query = { _id: new ObjectId(id) };
 			const result = await reviewCollection.deleteOne(query);
 			res.send(result);
 		});
@@ -135,30 +177,27 @@ async function run() {
 		// ! This is CRUD => U = Create //TODO: Update root
 		app.get('/update/:id', async (req, res) => {
 			const id = req.params.id;
-			const query = { _id: ObjectId(id) };
+			const query = { _id: new ObjectId(id) };
 			const result = await reviewCollection.findOne(query);
 			res.send(result);
 		});
 
 
 
-		//! Update value by Put/patch
+
+
+		// ! Update value by Put/patch
 		app.put('/update/:id', async (req, res) => {
 			const id = req.params.id;
-			const query = { _id: ObjectId(id) };
+			const query = { _id: new ObjectId(id) };
 			const review = req.body;
 			const option = { upsert: true };
 			const updatedReview = {
 				$set: {
 					message: review.message,
-					
 				},
 			};
-			const result = await reviewCollection.updateOne(
-				query,
-				updatedReview,
-				option
-			);
+			const result = await reviewCollection.updateOne(query,updatedReview,option);
 			res.send(result);
 		});
 	} finally {
@@ -166,6 +205,13 @@ async function run() {
 }
 run().catch((err) => console.error(err));
 
+
+app.get('/', (req, res) => {
+	res.send('Assignment Eleven Server is Running  check');
+});
+
+
+
 app.listen(port, () => {
-	console.log(`Assignment Eleven Server Listening on Port ${port}`);
+	console.log(`Assignment Eleven Server Runing on Port ${port}`);
 });
